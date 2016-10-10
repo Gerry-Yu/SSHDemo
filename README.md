@@ -176,7 +176,9 @@ private BaseDao baseDao;
 + @Resource是JDK1.6支持的注解，默认按照名称进行装配。名称可以通过name属性进行指定，如果没有指定name属性，当注解写在字段上时，默认取字段名，按照名称查找。如果注解写在setter方法上默认取属性名进行装配。当找不到与名称匹配的bean时才按照类型进行装配。但是需要注意的是，如果name属性一旦指定，就只会按照名称进行装配。（一般建议使用@Resource）
 
 ## JUnit测试
-> 需要加上@Transactional注解。这里是插入操作，JUnit默认要回滚，defaultRollback = false指定不回滚
+> 需要加上@Transactional注解。这里是插入操作，JUnit默认要回滚，defaultRollback = false指定不回滚  
+
+
 ``` java
 @RunWith(SpringJUnit4ClassRunner.class)
 @TransactionConfiguration(defaultRollback = false)
