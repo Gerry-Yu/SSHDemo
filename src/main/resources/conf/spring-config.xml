@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:property-placeholder location="classpath:conf/jdbc.properties" />
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+          p:driverClass="${jdbc_driverClassName}"
+          p:jdbcUrl="${jdbc_url}"
+          p:user="${jdbc_username}"
+          p:password="${jdbc_password}"
+          p:initialPoolSize="2"
+          p:maxPoolSize="40"
+          p:minPoolSize="2"
+          p:maxIdleTime="30" >
+    </bean>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" p:dataSource-ref="dataSource">
+        <property name="packagesToScan">
+            <list>
+                <value>com.demo.model</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.format_sql">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean name="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager" p:sessionFactory-ref="sessionFactory" />
+<!--        注解方式，需要在ServiceImpl加上@Transactional-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <!--AOP配置方式-->
+<!--
+    <aop:config>
+        <aop:pointcut id="txServices" expression="execution(* com.demo.service..*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txServices"/>
+    </aop:config>
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*" isolation="DEFAULT" propagation="REQUIRED" timeout="5"/>
+        </tx:attributes>
+    </tx:advice>
+-->
+
+    <!-- 显示指明 -->
+
+    <!--
+        <bean id="userDao" class="com.demo.dao.impl.UserDaoImpl" p:sessionFactory-ref="sessionFactory"/>
+        <bean id="userService" class="com.demo.service.impl.UserServiceImpl" p:userDao-ref="userDao"/>
+        <bean id="addUserAction" class="com.demo.action.AddUserAction" scope="prototype" p:userService-ref="userService"/>
+    -->
+
+    <!-- 自动扫描dao和service包(自动注入)  使用@@Service@Controller@Repository@Component-->
+    <context:component-scan base-package="com.demo.dao,com.demo.service" />
+
+</beans>
